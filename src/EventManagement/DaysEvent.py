@@ -1,10 +1,12 @@
 from Event import Event
 from enum import Enum
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from itertools import cycle
 from time import sleep
 
 class Days(Enum):
+
+    
     MONDAY=1
     TUESDAY=2
     WEDNESDAY=3
@@ -16,13 +18,14 @@ class Days(Enum):
 
 class DaysEvent(Event):
     
-    def __init__(self, repetition_days: list[Days] = []):
+    def __init__(self, repetition_days: list[Days] = [], time: time = time(0,0,0)):
         repetition_days = [*set(repetition_days)] #Remove repeated elements
         
         self.__repetition_days = self.__sort_days(repetition_days) #Sort days introduced
-        print(self.__get_next_position())
-        
-        print(self.__repetition_days)
+        self.__time_to_execute = time
+
+        next_day = self.__get_next_day_in_list()
+        self.__get_next_datetime(next_day)
 
     def __sort_days(self, days_list: list[Days]):
         n: int = len(days_list)
@@ -42,24 +45,56 @@ class DaysEvent(Event):
         
         return days_list
     
-    def __get_next_position(self):
-        current_day: datetime = datetime.now().isoweekday()
+
+    def __get_current_day(self) -> Days:
+        today_isoday: int = datetime.now().isoweekday()
+        
+        return list(Days)[today_isoday-1]
+    
+    def __get_next_day_in_list(self):
+        print(self.__repetition_days)
+        current_day: Days = Days.FRIDAY
         next_day: Days = self.__repetition_days[0]
             
-        i: int = 1
+        i: int = 0
 
-        while i < len(self.__repetition_days) and current_day >= self.__repetition_days[i].value:
+        while True:
+            if i >= len(self.__repetition_days):
+                return self.__repetition_days[0]
+
+            if current_day.value < self.__repetition_days[i].value:
+                break
             
-            next_day = self.__repetition_days[i]                
-            i += 1
-        
-        if next_day.value == current_day:
             next_day = self.__repetition_days[i]
-            
+            i += 1       
+
+        if current_day.value == next_day.value:
+            next_day = self.__repetition_days[i]
         
-        # print(f'Iterations: {i}')
         return next_day
+    
+    def __get_next_datetime(self, next_day: Days) -> datetime:
+        current_iso_calendar = datetime.isocalendar(datetime.now())
+        current_day: Days = self.__get_current_day()
+        current_week: int = current_iso_calendar[1]
+        current_year = current_iso_calendar[0]
+        target_week: int = current_week
+
+        next_datetime: datetime
         
+        if current_day.value > next_day.value:
+            target_week += 1
+        
+        
+        try:
+            next_datetime = datetime.fromisocalendar(current_year, current_week, next_day.value)
+
+        except ValueError:
+            next_datetime = datetime.fromisocalendar(current_year+1, 1, next_day.value)
+        
+        print(next_datetime)           
+
+        return next_datetime
 
 if __name__ == "__main__":
-    event = DaysEvent([Days.MONDAY, Days.FRIDAY, Days.SATURDAY, Days.SUNDAY, Days.THURSDAY])
+    event = DaysEvent([Days.MONDAY, Days.TUESDAY, Days.WEDNESDAY, Days.THURSDAY, Days.FRIDAY])

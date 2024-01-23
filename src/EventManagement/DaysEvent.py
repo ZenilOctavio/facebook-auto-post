@@ -1,12 +1,10 @@
-from Event import Event
+from .Event import Event
 from enum import Enum
 from datetime import datetime, timedelta, time
 from itertools import cycle
 from time import sleep
 
 class Days(Enum):
-
-    
     MONDAY=1
     TUESDAY=2
     WEDNESDAY=3
@@ -25,7 +23,8 @@ class DaysEvent(Event):
         self.__time_to_execute = time
 
         next_day = self.__get_next_day_in_list()
-        self.__get_next_datetime(next_day)
+        next_datetime = self.__get_next_datetime(next_day)
+        print(next_datetime)
 
     def __sort_days(self, days_list: list[Days]):
         n: int = len(days_list)
@@ -92,9 +91,16 @@ class DaysEvent(Event):
         except ValueError:
             next_datetime = datetime.fromisocalendar(current_year+1, 1, next_day.value)
         
-        print(next_datetime)           
+        next_datetime = next_datetime + timedelta(hours=self.__time_to_execute.hour, 
+                                                   minutes=self.__time_to_execute.minute, 
+                                                   seconds=self.__time_to_execute.second)        
 
         return next_datetime
+    
+    def wait():
+        super().wait()
+        
+        
 
 if __name__ == "__main__":
-    event = DaysEvent([Days.MONDAY, Days.TUESDAY, Days.WEDNESDAY, Days.THURSDAY, Days.FRIDAY])
+    event = DaysEvent([Days.MONDAY, Days.TUESDAY, Days.WEDNESDAY, Days.THURSDAY, Days.FRIDAY], time(hour=12))

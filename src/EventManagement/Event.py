@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Callable
-from EventManagement.errors import EventDateException
+from .errors import EventDateException
 import time
 
 class Event:

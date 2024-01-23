@@ -1,9 +1,11 @@
 from typing import Callable
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from EventManagement.Event import Event
 from EventManagement.RepetitionEvent import RepetitionEvent
 from EventManagement.reverse import enumerate_reverse_list
+from EventManagement.DaysEvent import DaysEvent
 from EventManagement.errors import EventDateException
+from EventManagement.MidWeekEvent import MidWeekEvent
 
 class EventPoolSync:
   events: list[Event | None] = []
@@ -54,9 +56,22 @@ class EventPoolSync:
 
     return wrapper
 
+  def mid_week_event(time_to_execute: time):
+    def event_creation(function: Callable):
+      def wrapper():
+        print('Executing function')
+        print(function)
+        function()
+        return MidWeekEvent.generate_next_datetime(time_to_execute)
+      
+      EventPoolSync.insert_event(MidWeekEvent(time_to_execute, wrapper))
+    
+    return event_creation
+        
+
   def repeat_event(next_date: datetime, time_interval: timedelta):  
       def repeat_event_creation(function: Callable):
-
+  
         def wrapper():
           function()
           return next_date + time_interval

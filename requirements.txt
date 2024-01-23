@@ -1,2 +1,6 @@
 yfinance
 python-dotenv
+beautifulsoup4
+lxml
+pytest-playwright
+ playwright install-deps 
